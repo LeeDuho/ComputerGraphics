@@ -69,7 +69,7 @@ int main(int argc, const char** argv) {
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        glClearColor(0.5f, 0.5f, 0.4f, 0.1f);
+        glClearColor(0.4f, 0.4f, 0.2f, 0.2f);
         glClear(GL_COLOR_BUFFER_BIT);
         glfwSwapBuffers(window);
         
