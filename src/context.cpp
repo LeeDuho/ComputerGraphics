@@ -165,15 +165,13 @@ bool Context::Init() {
 }
 
 void Context::CreateCylinder() {
-
 }
 
 void Context::CreateSphere() {
-
 }
 
 void Context::CreateDonut() {
-    
+
 }
 
 
