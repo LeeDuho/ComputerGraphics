@@ -12,6 +12,12 @@ CLASS_PTR(Context)
 class Context {
 public:
     static ContextUPtr Create();
+
+    void CreateBox();
+    void CreateCylinder(int m_cylinderSegments, float m_upperRadius, float m_lowerRadius, float m_cylinderHeight);
+    void CreateSphere();
+    void CreateDonut();
+
     void Render();    
     void ProcessInput(GLFWwindow* window);
     void Reshape(int width, int height);
@@ -30,6 +36,14 @@ private:
     TextureUPtr m_texture1;
     TextureUPtr m_texture2;
     TextureUPtr m_texture3;
+    int m_indexCount { 36 };
+    int m_primitiveCount { 0 };
+
+    // cylinder
+    int m_cylinderSegments { 16 };
+    float m_upperRadius { 0.5f };
+    float m_lowerRadius { 0.5f };
+    float m_cylinderHeight { 1.0f };
 
     // clear color
     glm::vec4 m_clearColor { glm::vec4(0.4f, 0.4f, 0.2f, 0.2f) };

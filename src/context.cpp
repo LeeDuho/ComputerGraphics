@@ -164,10 +164,131 @@ bool Context::Init() {
 
 }
 
-void Context::CreateCylinder() {
+void Context::CreateBox() {
+}
+
+void Context::CreateCylinder(int m_cylinderSegments, float m_upperRadius, float m_lowerRadius, float m_cylinderHeight) {
+    
+    const float pi = 3.141592f;
+    
+    std::vector<float> vertices;
+    std::vector<uint32_t> indices;
+    
+    //윗면 생성
+    vertices.push_back(0.0f);
+    vertices.push_back(m_cylinderHeight/2.0f);
+    vertices.push_back(0.0f);
+    for (int i = 0; i <= m_cylinderSegments; i++) {
+        float angle = (360.0f / m_cylinderSegments * i) * pi /180.0f;
+        float x = cosf(angle) * m_upperRadius;
+        float z = sinf(angle) * m_upperRadius;
+        vertices.push_back(x);
+        vertices.push_back(m_cylinderHeight/2.0f);
+        vertices.push_back(z);
+    }
+    for (int i = 0; i < m_cylinderSegments; i++) {
+        indices.push_back(0);
+        indices.push_back(i + 1);
+        indices.push_back(i + 2);
+    }
+
+    //아랫면 생성
+    vertices.push_back(0.0f);
+    vertices.push_back(m_cylinderHeight/(-2.0f));
+    vertices.push_back(0.0f);
+    for (int i = 0; i <= m_cylinderSegments; i++) {
+        float angle = (360.0f / m_cylinderSegments * i) * pi /180.0f;
+        float x = cosf(angle) * m_lowerRadius;
+        float z = sinf(angle) * m_lowerRadius;
+        vertices.push_back(x);
+        vertices.push_back(m_cylinderHeight/(-2.0f));
+        vertices.push_back(z);
+    }
+    for (int i = m_cylinderSegments + 3; i < 2 * m_cylinderSegments + 3; i++) {
+        indices.push_back(m_cylinderSegments + 3);
+        indices.push_back(i + 1);
+        indices.push_back(i + 2);
+    }
+
+    //옆면 생성
+    for (int i = 0; i <= m_cylinderSegments; i++) {
+        float angle = (360.0f / m_cylinderSegments * i) * pi /180.0f;
+        float x1 = cosf(angle) * m_upperRadius;
+        float z1 = sinf(angle) * m_upperRadius;
+        float x2 = cosf(angle) * m_lowerRadius;
+        float z2 = sinf(angle) * m_lowerRadius;
+        vertices.push_back(x1);
+        vertices.push_back(m_cylinderHeight/2.0f);
+        vertices.push_back(z1);
+        vertices.push_back(x2);
+        vertices.push_back(m_cylinderHeight/(-2.0f));
+        vertices.push_back(z2);
+    }
+    for (int i = 2 * m_cylinderSegments + 5; i < 4 * m_cylinderSegments + 6; i++) {
+        indices.push_back(i);
+        indices.push_back(i + 1);
+        indices.push_back(i + 2);
+    }
+    
+
+    m_vertexLayout = VertexLayout::Create();
+    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER,
+        GL_STATIC_DRAW, vertices.data(), sizeof(float) * vertices.size());
+    
+    m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+    // m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+    //m_vertexLayout->SetAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, sizeof(float) * 3);
+
+    m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER,
+        GL_STATIC_DRAW, indices.data(), sizeof(uint32_t) * indices.size());
+        
+    m_indexCount = (int)indices.size();
+    
 }
 
 void Context::CreateSphere() {
+
+    std::vector<float> verticess;
+    std::vector<uint32_t> indicess;
+
+    const float pi = 3.141592f;
+
+    float anglerange = 360.0f;
+    float arcspi = 0.0f / 180.0f * pi;
+    
+    for (int i = 0; i <= 32; i++) {
+        float angle = (anglerange / 32 * i) * pi / 180.0f;
+        float x1 = cosf(arcspi + angle) * 0.7f;
+        float y1 = sinf(arcspi + angle) * 0.7f;
+        verticess.push_back(x1);
+        verticess.push_back(y1);
+        verticess.push_back(0.0f);
+        float x2 = cosf(arcspi + angle) * 0.5f;
+        float y2 = sinf(arcspi + angle) * 0.5f;
+        verticess.push_back(x2);
+        verticess.push_back(y2);
+        verticess.push_back(0.0f);
+    }
+
+    for (int i = 0; i < 32 * 2; i++) {
+        indicess.push_back(i);
+        indicess.push_back(i + 1);
+        indicess.push_back(i + 2);
+    }
+
+
+
+    m_vertexLayout = VertexLayout::Create();
+    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER,
+        GL_STATIC_DRAW, verticess.data(), sizeof(float) * verticess.size());
+
+    m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); 
+
+    m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER,
+        GL_STATIC_DRAW, indicess.data(), sizeof(uint32_t) * indicess.size());
+
+    m_indexCount = (int)indicess.size();
+
 }
 
 void Context::CreateDonut() {
@@ -212,10 +333,19 @@ void Context::Render() {
         }
 
         if(selectedPrimitive == 0){
+            m_primitiveCount = 0;
         }
         if(selectedPrimitive == 1){
+            m_primitiveCount = 1;
+            ImGui::DragInt("segments", &m_cylinderSegments, 16);
+            ImGui::DragFloat("upper radius", &m_upperRadius, 0.5f);
+            ImGui::DragFloat("lower radius", &m_lowerRadius, 0.5f);
+            ImGui::DragFloat("height", &m_cylinderHeight, 1.0f);
+            Context::CreateCylinder(m_cylinderSegments ,m_upperRadius, m_lowerRadius, m_cylinderHeight);
+
         }
         if(selectedPrimitive == 2){
+            Context::CreateSphere();
         }
         if(selectedPrimitive == 3){
         }
@@ -239,10 +369,10 @@ void Context::Render() {
       m_cameraUp);
 
     auto model = glm::rotate(glm::mat4(1.0f),
-        glm::radians(0.0f /*(float)glfwGetTime() * 120.0f */),
+        glm::radians((float)glfwGetTime() * 120.0f),
         glm::vec3(1.0f, 0.5f, 0.0f));
     auto transform = projection * view * model;
     m_program->SetUniform("transform", transform);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    
+    glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, 0);
+   
 }
