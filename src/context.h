@@ -16,7 +16,7 @@ public:
     void CreateBox();
     void CreateCylinder(int m_cylinderSegments, float m_upperRadius, float m_lowerRadius, float m_cylinderHeight);
     void CreateSphere(int m_sphereHeightSeg, int m_sphereWidthSeg);
-    void CreateDonut();
+    void CreateDonut(int m_donutOutSeg, int m_donutInSeg, float m_donutOutRadius, float m_donutInRadius);
 
     void Render();    
     void ProcessInput(GLFWwindow* window);
@@ -47,6 +47,12 @@ private:
     // sphere
     int m_sphereHeightSeg { 16 };
     int m_sphereWidthSeg { 32 };
+
+    // donut
+    int m_donutOutSeg { 32 };
+    int m_donutInSeg { 16 };
+    float m_donutOutRadius { 1.0f };
+    float m_donutInRadius { 0.25f };
 
     // clear color
     glm::vec4 m_clearColor { glm::vec4(0.4f, 0.4f, 0.2f, 0.2f) };

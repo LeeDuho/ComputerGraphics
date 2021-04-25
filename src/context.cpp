@@ -253,7 +253,9 @@ void Context::CreateSphere(int m_sphereHeightSeg, int m_sphereWidthSeg) {
 
     const float pi = 3.141592f;
     
+    //높이 초기값
     float heightAngle = 90.0f * pi / 180.0f;
+    //높이 범위
     float angleRange = (180.0f / m_sphereHeightSeg) * pi /180.0f;
     int verticesNum = 0;
 
@@ -296,7 +298,56 @@ void Context::CreateSphere(int m_sphereHeightSeg, int m_sphereWidthSeg) {
 
 }
 
-void Context::CreateDonut() {
+void Context::CreateDonut(int m_donutOutSeg, int m_donutInSeg, float m_donutOutRadius, float m_donutInRadius) {
+
+    std::vector<float> vertices;
+    std::vector<uint32_t> indices;
+
+    const float pi = 3.141592f;
+    
+    float outAngle = 0.0f;
+    float outAngleRange = (360.0f / m_donutOutSeg) * pi / 180.0f;
+    float inAngleRange = (360.0f / m_donutInSeg) * pi /180.0f;
+    int verticesNum = 0;
+    
+    for (int i =0 ; i <= m_donutOutSeg ; i ++) {
+        for (int j =0 ; j <= m_donutInSeg ; j ++) {
+            //도넛 내부 원들의 좌표
+            float inAngle = (360.0f / m_donutInSeg * j) * pi / 180.0f;
+            float x = (m_donutInRadius * cosf(inAngle) + m_donutOutRadius) * cosf(outAngle);
+            float y = m_donutInRadius * sinf(inAngle);
+            float z = (m_donutInRadius * cosf(inAngle) + m_donutOutRadius) * sinf(outAngle);
+            vertices.push_back(x);
+            vertices.push_back(y);
+            vertices.push_back(z);
+            verticesNum += 1;
+        }
+        outAngle = outAngle + outAngleRange;
+    }
+
+    for (int i = 0; i <= verticesNum - m_donutInSeg - 2; i++) {
+        //원들의 좌표 이어서 도넛 그리기
+        indices.push_back(i);
+        indices.push_back(i + 1);
+        indices.push_back(i + m_donutInSeg + 1);
+
+        indices.push_back(i + 1);
+        indices.push_back(i + m_donutInSeg + 1);
+        indices.push_back(i + m_donutInSeg + 2);
+    }
+    
+    
+
+    m_vertexLayout = VertexLayout::Create();
+    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER,
+        GL_STATIC_DRAW, vertices.data(), sizeof(float) * vertices.size());
+
+    m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); 
+
+    m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER,
+        GL_STATIC_DRAW, indices.data(), sizeof(uint32_t) * indices.size());
+
+    m_indexCount = (int)indices.size();
 
 }
 
@@ -352,6 +403,11 @@ void Context::Render() {
             Context::CreateSphere(m_sphereHeightSeg, m_sphereWidthSeg);
         }
         if(selectedPrimitive == 3){
+            ImGui::DragInt("outer seg", &m_donutOutSeg, 32);
+            ImGui::DragInt("inner seg", &m_donutInSeg, 16);
+            ImGui::DragFloat("outer radius", &m_donutOutRadius, 1.0f);
+            ImGui::DragFloat("inner radius", &m_donutInRadius, 0.25f);
+            Context::CreateDonut(m_donutOutSeg, m_donutInSeg, m_donutOutRadius, m_donutInRadius);
         }
     }
     ImGui::End();
