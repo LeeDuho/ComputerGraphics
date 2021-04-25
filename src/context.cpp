@@ -246,55 +246,59 @@ void Context::CreateCylinder(int m_cylinderSegments, float m_upperRadius, float 
     
 }
 
-void Context::CreateSphere() {
+void Context::CreateSphere(int m_sphereHeightSeg, int m_sphereWidthSeg) {
 
-    std::vector<float> verticess;
-    std::vector<uint32_t> indicess;
+    std::vector<float> vertices;
+    std::vector<uint32_t> indices;
 
     const float pi = 3.141592f;
-
-    float anglerange = 360.0f;
-    float arcspi = 0.0f / 180.0f * pi;
     
-    for (int i = 0; i <= 32; i++) {
-        float angle = (anglerange / 32 * i) * pi / 180.0f;
-        float x1 = cosf(arcspi + angle) * 0.7f;
-        float y1 = sinf(arcspi + angle) * 0.7f;
-        verticess.push_back(x1);
-        verticess.push_back(y1);
-        verticess.push_back(0.0f);
-        float x2 = cosf(arcspi + angle) * 0.5f;
-        float y2 = sinf(arcspi + angle) * 0.5f;
-        verticess.push_back(x2);
-        verticess.push_back(y2);
-        verticess.push_back(0.0f);
+    float heightAngle = 90.0f * pi / 180.0f;
+    float angleRange = (180.0f / m_sphereHeightSeg) * pi /180.0f;
+    int verticesNum = 0;
+
+    for (int i = 0 ; i <= m_sphereHeightSeg; i++) {
+        for (int j = 0; j <= m_sphereWidthSeg; j++) {
+            float widthAngle = (360.0f / m_sphereWidthSeg * j) * pi /180.0f;
+            float x1 = cosf(heightAngle) * cosf(widthAngle);
+            float y1 = sinf(heightAngle);
+            float z1 = cosf(heightAngle) * sinf(widthAngle);
+
+            float x2 = cosf(heightAngle - angleRange) * cosf(widthAngle);
+            float y2 = sinf(heightAngle - angleRange);
+            float z2 = cosf(heightAngle - angleRange) * sinf(widthAngle);
+            vertices.push_back(x1);
+            vertices.push_back(y1);
+            vertices.push_back(z1);
+            vertices.push_back(x2);
+            vertices.push_back(y2);
+            vertices.push_back(z2);
+            verticesNum +=2;
+        }
+        heightAngle = heightAngle - angleRange;
     }
-
-    for (int i = 0; i < 32 * 2; i++) {
-        indicess.push_back(i);
-        indicess.push_back(i + 1);
-        indicess.push_back(i + 2);
+    for (int i = 0; i < verticesNum -2 ; i++) {
+        indices.push_back(i);
+        indices.push_back(i + 1);
+        indices.push_back(i + 2);
     }
-
-
 
     m_vertexLayout = VertexLayout::Create();
     m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER,
-        GL_STATIC_DRAW, verticess.data(), sizeof(float) * verticess.size());
+        GL_STATIC_DRAW, vertices.data(), sizeof(float) * vertices.size());
 
     m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); 
 
     m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER,
-        GL_STATIC_DRAW, indicess.data(), sizeof(uint32_t) * indicess.size());
+        GL_STATIC_DRAW, indices.data(), sizeof(uint32_t) * indices.size());
 
-    m_indexCount = (int)indicess.size();
+    m_indexCount = (int)indices.size();
 
 }
 
 void Context::CreateDonut() {
 
 }
-
 
 
 
@@ -333,10 +337,8 @@ void Context::Render() {
         }
 
         if(selectedPrimitive == 0){
-            m_primitiveCount = 0;
         }
         if(selectedPrimitive == 1){
-            m_primitiveCount = 1;
             ImGui::DragInt("segments", &m_cylinderSegments, 16);
             ImGui::DragFloat("upper radius", &m_upperRadius, 0.5f);
             ImGui::DragFloat("lower radius", &m_lowerRadius, 0.5f);
@@ -345,7 +347,9 @@ void Context::Render() {
 
         }
         if(selectedPrimitive == 2){
-            Context::CreateSphere();
+            ImGui::DragInt("lati.seg", &m_sphereHeightSeg, 16);
+            ImGui::DragInt("longi.seg", &m_sphereWidthSeg, 32);
+            Context::CreateSphere(m_sphereHeightSeg, m_sphereWidthSeg);
         }
         if(selectedPrimitive == 3){
         }
