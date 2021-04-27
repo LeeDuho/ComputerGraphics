@@ -54,6 +54,15 @@ private:
     float m_donutOutRadius { 1.0f };
     float m_donutInRadius { 0.25f };
 
+    //  vertices, triangle number
+    int m_numVertices { 24 };
+    int m_numTriangles { 12 };
+    
+    // rotation , scale
+    glm::vec3 m_rotation { glm::vec3(0.0f, 0.0f, 0.0f)};
+    glm::vec3 m_scale { glm::vec3(1.0f, 1.0f, 1.0f) };   
+    glm::vec3 m_rotSpeed { glm::vec3(0.0f, 0.0f, 0.0f) };   
+
     // clear color
     glm::vec4 m_clearColor { glm::vec4(0.4f, 0.4f, 0.2f, 0.2f) };
 
