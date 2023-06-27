@@ -1,0 +1,9 @@
+{
+    "cmake.debugConfig": {
+        "cwd": "${workspaceFolder}",
+        "args": ["0.6", "0.5", "32" ,"0" ,"360" ,"1" ,"1" ,"1" ]
+    },
+    "files.associations": {
+        "vector": "cpp"
+    }
+}
